@@ -1,0 +1,3 @@
+require "./TicTacToe"
+
+TicTacToe.new
