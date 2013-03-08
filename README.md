@@ -8,7 +8,3 @@ It's quite interesting how a small game like this can be made interesting in ter
 ## Instructions
 
 Run the program by `ruby start.rb`
-
-## Notes
-
-The code is very messy as I am still learning the language. I wanted to clean the entire the code and start afresh and I am going to do it. This works for now.

@@ -1,12 +1,17 @@
 class TicTacToe
 
   def initialize
+
+    # Use 3x3 Magic Square to find the position to win/block
+    
     @positions = {
       :a1 => 2, :a2 => 7, :a3 => 6,
       :b1 => 9, :b2 => 5, :b3 => 1,
       :c1 => 4, :c2 => 3, :c3 => 8
     }
 
+    # List of possible victory combinations
+    
     @victories =
       [:a1,:a2,:a3],
       [:b1,:b2,:b3],
@@ -19,29 +24,43 @@ class TicTacToe
       [:a1,:b2,:c3],
       [:c1,:b2,:a3]
 
+    # Declaring the playing board
+
     @board = {
       :a1 => " ", :a2 => " ", :a3 => " ",
       :b1 => " ", :b2 => " ", :b3 => " ",
       :c1 => " ", :c2 => " ", :c3 => " "
     }
 
-    @corners = @positions.select {|k,v| v % 2 == 0}
+    @corners = @positions.select {|k,v| v % 2 == 0} # list of all corners
 
-    @turns = possible_moves.keys.count
+    @turns = possible_moves.keys.count # number of turns left in the game
 
+    # Deciding who will play first
+    
     @cpu = rand() > 0.5 ? 'X' : 'O'
     @user = @cpu == 'X' ? 'O' : 'X'
 
-    @last_move = nil
+    @last_move = nil # variable to control game flow
 
+    # Banner
+    
     put_line
     puts("Welcome to The Unbeatable TicTacToe master")
     put_line
 
-    draw_start_grid
+    # Position Helper
+    
+    puts("a1 | a2 | a3")
+    puts("-- | -- | --")
+    puts("b1 | b2 | b3")
+    puts("-- | -- | --")
+    puts("c1 | c2 | c3")
 
-    start_game(@user == 'X')
+    start_game(@user == 'X') # Starting game
   end
+
+  # Start Game
 
   def start_game(user_starts_first)
     if (user_starts_first)
@@ -50,6 +69,10 @@ class TicTacToe
       cpu_move
     end
   end
+
+  # Gets user input
+  # Prompts if incorrect move/input is made
+  # Exits if the input is 'exit'
 
   def get_input
     moves = possible_moves
@@ -81,6 +104,8 @@ class TicTacToe
     end
   end
 
+  # Function to control the user's move
+
   def user_move
     input = get_input
     @board[input] = @user
@@ -88,10 +113,17 @@ class TicTacToe
     check_status
   end
 
+  # Function to control the cpu's move
+  # The logic for the victory is written in here
+
   def cpu_move
-    flag = possible_victory
-    if flag != 0
-      @board[flag] = @cpu
+    is_user_going_to_win = possible_victory("user")
+    is_cpu_going_to_win = possible_victory("cpu")
+    if is_user_going_to_win != 0
+      @board[is_user_going_to_win] = @cpu
+    end
+    if is_cpu_going_to_win != 0
+      @board[is_cpu_going_to_win] = @cpu
     else
       if @board[:b2] == " " # if center is empty cpu moves to center
         @board[:b2] = @cpu
@@ -112,16 +144,95 @@ class TicTacToe
     check_status
   end
 
-  def possible_victory
+  # HELPERS
+
+  # Returns list of possible moves
+
+  def possible_moves
+    return @board.select {|k,v| v == " "}
+  end
+
+  # Updates the available corners
+
+  def update_corners
+    @corners.delete_if {|k,v| @board[k] != " "}
+  end
+
+  # Updates the number of turns left after each move
+
+  def update_turns
+    @turns = possible_moves.keys.count
+  end
+
+  # Displays error if incorrect input is made
+  
+  def wrong_input
+    puts("Wrong Input: The input should be of the form A1, B2, C3 or similar.")
+    get_input
+  end
+
+  # Displays error if the move was made on wrong tile
+
+  def wrong_move
+    puts("Wrong Move: The tile you wish to move to is not empty.")
+    get_input
+  end
+
+  # CHECK STATUS OF GAME
+
+  # The driving force of the game.
+  # Updates the corners, turns
+  # Checks if the game is a win or a draw
+  
+  def check_status
+    put_line('-')
+    @last_move == "user" ? puts("Your move"): puts("CPU's move")
+    put_line('-')
+
+    update_corners
+    update_turns
+
+    draw_board
+    victory_flag = check_victory
+    if victory_flag == "user"
+      puts "USER WINS!"
+    elsif victory_flag == "cpu"
+      puts "CPU WINS!"
+    else
+      if @turns == 0 && check_draw
+        puts "Game was a draw"
+      else
+        @last_move == "user" ? cpu_move : user_move
+      end
+    end
+    exit 0
+  end
+
+  # Check if the user has a chance of winning
+  # if yes, then return position to block
+  # else, does nothing
+
+  def possible_victory(who = "user")
     @victories.each do |victory|
       sum = 0
       count = 0
 
-      if !(victory.detect {|key| @board[key] == @cpu})
-        victory.each do |key|
-          if @board[key] == @user
-            sum += @positions[key]
-            count += 1
+      if who == "user"
+        if !(victory.detect {|key| @board[key] == @cpu})
+          victory.each do |key|
+            if @board[key] == @user
+              sum += @positions[key]
+              count += 1
+            end
+          end
+        end
+      elsif who == "cpu"
+        if !(victory.detect {|key| @board[key] == @user})
+          victory.each do |key|
+            if @board[key] == @cpu
+              sum += @positions[key]
+              count += 1
+            end
           end
         end
       end
@@ -134,6 +245,8 @@ class TicTacToe
     return 0
   end
 
+  # Checks if either user or cpu has won the game
+  
   def check_victory
     winner = ""
     @victories.each do |victory|
@@ -170,6 +283,8 @@ class TicTacToe
     end
   end
 
+  # Check if the game is ending in a draw
+  
   def check_draw
     @victories.each do |victory|
       count =
@@ -194,66 +309,16 @@ class TicTacToe
     end
   end
 
-  def possible_moves
-    return @board.select {|k,v| v == " "}
-  end
-
-  def update_corners
-    @corners.delete_if {|k,v| @board[k] != " "}
-  end
-
-  def update_turns
-    @turns = possible_moves.keys.count
-  end
-
-  def wrong_input
-    puts("The input should be of the form A1, B2, C3 or similar.")
-    get_input
-  end
-
-  def wrong_move
-    puts("The tile you wish to move to is not empty.")
-    get_input
-  end
-
-  def check_status
-    put_line('-')
-    @last_move == "user" ? puts("Your move"): puts("CPU's move")
-    put_line('-')
-
-    update_corners
-    update_turns
-
-    draw_board
-    victory_flag = check_victory
-    if victory_flag == "user"
-      puts "USER WINS!"
-    elsif victory_flag == "cpu"
-      puts "CPU WINS!"
-    else
-      if @turns == 0 && check_draw
-        puts "Game was a draw"
-      else
-        @last_move == "user" ? cpu_move : user_move
-      end
-    end
-    exit 0
-  end
+  # VISUAL HELPERS
 
   # Draws a line with the provided character
+  
   def put_line(char = '*')
     puts("#{char}" * 42)
   end
 
-  # Draws the starting grid with the possible inputs
-  def draw_start_grid
-    puts("a1 | a2 | a3")
-    puts("-- | -- | --")
-    puts("b1 | b2 | b3")
-    puts("-- | -- | --")
-    puts("c1 | c2 | c3")
-  end
-
+  # Draws the board with the inputs on the tile space
+  
   def draw_board
     puts(" #{@board[:a1]} | #{@board[:a2]} | #{@board[:a3]}")
     puts(" - | - | -")
