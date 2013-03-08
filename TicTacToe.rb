@@ -1,12 +1,17 @@
 class TicTacToe
 
   def initialize
+
+    # Use 3x3 Magic Square to find the position to win/block
+    
     @positions = {
       :a1 => 2, :a2 => 7, :a3 => 6,
       :b1 => 9, :b2 => 5, :b3 => 1,
       :c1 => 4, :c2 => 3, :c3 => 8
     }
 
+    # List of possible victory combinations
+    
     @victories =
       [:a1,:a2,:a3],
       [:b1,:b2,:b3],
@@ -19,34 +24,43 @@ class TicTacToe
       [:a1,:b2,:c3],
       [:c1,:b2,:a3]
 
+    # Declaring the playing board
+
     @board = {
       :a1 => " ", :a2 => " ", :a3 => " ",
       :b1 => " ", :b2 => " ", :b3 => " ",
       :c1 => " ", :c2 => " ", :c3 => " "
     }
 
-    @corners = @positions.select {|k,v| v % 2 == 0}
+    @corners = @positions.select {|k,v| v % 2 == 0} # list of all corners
 
-    @turns = possible_moves.keys.count
+    @turns = possible_moves.keys.count # number of turns left in the game
 
+    # Deciding who will play first
+    
     @cpu = rand() > 0.5 ? 'X' : 'O'
     @user = @cpu == 'X' ? 'O' : 'X'
 
-    @last_move = nil
+    @last_move = nil # variable to control game flow
 
+    # Banner
+    
     put_line
     puts("Welcome to The Unbeatable TicTacToe master")
     put_line
 
-    # position helper
+    # Position Helper
+    
     puts("a1 | a2 | a3")
     puts("-- | -- | --")
     puts("b1 | b2 | b3")
     puts("-- | -- | --")
     puts("c1 | c2 | c3")
 
-    start_game(@user == 'X')
+    start_game(@user == 'X') # Starting game
   end
+
+  # Start Game
 
   def start_game(user_starts_first)
     if (user_starts_first)
@@ -55,6 +69,10 @@ class TicTacToe
       cpu_move
     end
   end
+
+  # Gets user input
+  # Prompts if incorrect move/input is made
+  # Exits if the input is 'exit'
 
   def get_input
     moves = possible_moves
@@ -86,12 +104,17 @@ class TicTacToe
     end
   end
 
+  # Function to control the user's move
+
   def user_move
     input = get_input
     @board[input] = @user
     @last_move = "user"
     check_status
   end
+
+  # Function to control the cpu's move
+  # The logic for the victory is written in here
 
   def cpu_move
     is_user_going_to_win = possible_victory("user")
@@ -129,21 +152,29 @@ class TicTacToe
     return @board.select {|k,v| v == " "}
   end
 
+  # Updates the available corners
+
   def update_corners
     @corners.delete_if {|k,v| @board[k] != " "}
   end
+
+  # Updates the number of turns left after each move
 
   def update_turns
     @turns = possible_moves.keys.count
   end
 
+  # Displays error if incorrect input is made
+  
   def wrong_input
-    puts("The input should be of the form A1, B2, C3 or similar.")
+    puts("Wrong Input: The input should be of the form A1, B2, C3 or similar.")
     get_input
   end
 
+  # Displays error if the move was made on wrong tile
+
   def wrong_move
-    puts("The tile you wish to move to is not empty.")
+    puts("Wrong Move: The tile you wish to move to is not empty.")
     get_input
   end
 
