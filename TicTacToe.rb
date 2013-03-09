@@ -38,9 +38,10 @@ class TicTacToe
 
     # Deciding who will play first
     
-    # @cpu = rand() > 0.5 ? 'X' : 'O'
-    # @user = @cpu == 'X' ? 'O' : 'X'
+    @cpu = rand() > 0.5 ? 'X' : 'O'
+    @user = @cpu == 'X' ? 'O' : 'X'
 
+    # Comment the following lines to make the first draw random
     @cpu = 'O'
     @user = 'X' # user will always go first
 
@@ -122,22 +123,34 @@ class TicTacToe
   def cpu_move
     is_user_going_to_win = possible_victory("user")
     is_cpu_going_to_win = possible_victory("cpu")
+    # Make cpu make the winning move if possible
     if is_cpu_going_to_win != 0
       @board[is_cpu_going_to_win] = @cpu
+    # If user can win, block user's move
     elsif is_user_going_to_win != 0
       @board[is_user_going_to_win] = @cpu
+    # Otherwise make the next move on basis of standard winning strategy
     else
-      if @board[:b2] == " " # if center is empty cpu moves to center
+      # If center is empty and it's not the first move of the game cpu moves to center
+      if @board[:b2] == " " && @last_move != nil
         @board[:b2] = @cpu
-      elsif @corners.count == 3 # if only three corners are empty
-        first_corner = @corners.keys.first
-        first_corner_value = @corners[first_corner]
-        possible_corners = @corners.select {|k,v| v + first_corner_value == 10}
-        random_corner = possible_corners.keys.sample
-        @board[random_corner] = @cpu
-      elsif (@corners.count <= 2 || @corners.count == 4) && @corners.count != 0 # choose random corner
+      elsif @corners.count == 4 || (@corners.count <= 2 && @corners.count > 0) # choose random corner
         random_corner= @corners.keys.sample
         @board[random_corner] = @cpu
+      elsif @corners.count == 3 # if only three corners are empty
+        occupied_corner = @positions.select {|k,v| v % 2 == 0 && @board[k] == @cpu}
+        if !occupied_corner.nil?
+          occupied_corner_value = @positions[occupied_corner.keys.first]
+          possible_corners = @positions.select {|k,v| v + occupied_corner_value == 10}
+          possible_corner = possible_corners.keys.first
+          @board[possible_corner] = @cpu
+        else
+          first_corner = @corners.keys.first
+          first_corner_value = @corners[first_corner]
+          possible_corners = @corners.select {|k,v| v + first_corner_value == 10}
+          random_corner = possible_corners.keys.sample
+          @board[random_corner] = @cpu
+        end
       else #make random move
         @board[possible_moves.keys.sample] = @cpu
       end
@@ -220,8 +233,11 @@ class TicTacToe
       count = 0
 
       if who == "user"
+        # If it's a unique winning case where the user can get two possible winning spaces
         if victory == [:a1,:b2,:c3] || victory == [:c1,:b2,:a3]
+          # Check if the user has one move on two corners in any diagonal
           if victory.detect {|key| @board[:a1] == @user && @board[:c3] == @user} || victory.detect {|key| @board[:a3] == @user && @board[:c1] == @user}
+            # Decide move
             if @board[:a1] == " " && @board[:c1] == " "
               sum = rand() > 0.5 ? 12 : 8
             elsif @board[:a1] == " "
@@ -232,6 +248,7 @@ class TicTacToe
             count = 2
           end
         else
+          # If there are no moves by cpu in any victory condition then check if user can win
           if !(victory.detect {|key| @board[key] == @cpu})
             victory.each do |key|
               if @board[key] == @user
@@ -241,6 +258,7 @@ class TicTacToe
             end
           end
         end
+      # Check whether cpu can win
       elsif who == "cpu"
         if !(victory.detect {|key| @board[key] == @user})
           victory.each do |key|
@@ -254,7 +272,7 @@ class TicTacToe
       
       if sum < 15 && count == 2
         pos = 15 - sum
-        return @positions.key(pos)
+        return @positions.key(pos) # return position for making next move
       end
     end
     return 0
