@@ -122,11 +122,10 @@ class TicTacToe
   def cpu_move
     is_user_going_to_win = possible_victory("user")
     is_cpu_going_to_win = possible_victory("cpu")
-    if is_user_going_to_win != 0
-      @board[is_user_going_to_win] = @cpu
-    end
     if is_cpu_going_to_win != 0
       @board[is_cpu_going_to_win] = @cpu
+    elsif is_user_going_to_win != 0
+      @board[is_user_going_to_win] = @cpu
     else
       if @board[:b2] == " " # if center is empty cpu moves to center
         @board[:b2] = @cpu
@@ -221,11 +220,24 @@ class TicTacToe
       count = 0
 
       if who == "user"
-        if !(victory.detect {|key| @board[key] == @cpu})
-          victory.each do |key|
-            if @board[key] == @user
-              sum += @positions[key]
-              count += 1
+        if victory == [:a1,:b2,:c3] || victory == [:c1,:b2,:a3]
+          if victory.detect {|key| @board[:a1] == @user && @board[:c3] == @user} || victory.detect {|key| @board[:a3] == @user && @board[:c1] == @user}
+            if @board[:a1] == " " && @board[:c1] == " "
+              sum = rand() > 0.5 ? 12 : 8
+            elsif @board[:a1] == " "
+              sum = 8
+            elsif @board[:c1] == " "
+              sum = 12
+            end
+            count = 2
+          end
+        else
+          if !(victory.detect {|key| @board[key] == @cpu})
+            victory.each do |key|
+              if @board[key] == @user
+                sum += @positions[key]
+                count += 1
+              end
             end
           end
         end
