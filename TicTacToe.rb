@@ -139,7 +139,7 @@ class TicTacToe
         @board[random_corner] = @cpu
       elsif @corners.count == 3 # if only three corners are empty
         occupied_corner = @positions.select {|k,v| v % 2 == 0 && @board[k] == @cpu}
-        if !occupied_corner.nil?
+        if !occupied_corner.empty?
           occupied_corner_value = @positions[occupied_corner.keys.first]
           possible_corners = @positions.select {|k,v| v + occupied_corner_value == 10}
           possible_corner = possible_corners.keys.first
