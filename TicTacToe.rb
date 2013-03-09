@@ -38,8 +38,11 @@ class TicTacToe
 
     # Deciding who will play first
     
-    @cpu = rand() > 0.5 ? 'X' : 'O'
-    @user = @cpu == 'X' ? 'O' : 'X'
+    # @cpu = rand() > 0.5 ? 'X' : 'O'
+    # @user = @cpu == 'X' ? 'O' : 'X'
+
+    @cpu = 'O'
+    @user = 'X' # user will always go first
 
     @last_move = nil # variable to control game flow
 
