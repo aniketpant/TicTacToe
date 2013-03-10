@@ -234,19 +234,17 @@ class TicTacToe
 
       if who == "user"
         # If it's a unique winning case where the user can get two possible winning spaces
-        if victory == [:a1,:b2,:c3] || victory == [:c1,:b2,:a3]
-          # Check if the user has one move on two corners in any diagonal
-          if victory.detect {|key| @board[:a1] == @user && @board[:c3] == @user} || victory.detect {|key| @board[:a3] == @user && @board[:c1] == @user}
-            # Decide move
-            if @board[:a1] == " " && @board[:c1] == " "
-              sum = rand() > 0.5 ? 12 : 8
-            elsif @board[:a1] == " "
-              sum = 8
-            elsif @board[:c1] == " "
-              sum = 12
-            end
-            count = 2
+        # Check if the user has one move on two corners in any diagonal
+        if victory.detect {|key| @board[:a1] == @user && @board[:c3] == @user} || victory.detect {|key| @board[:a3] == @user && @board[:c1] == @user}
+          # Decide move
+          if @board[:a1] == " " && @board[:c1] == " "
+            sum = rand() > 0.5 ? 12 : 8
+          elsif @board[:a1] == " "
+            sum = 8
+          elsif @board[:c1] == " "
+            sum = 12
           end
+          count = 2
         else
           # If there are no moves by cpu in any victory condition then check if user can win
           if !(victory.detect {|key| @board[key] == @cpu})
