@@ -121,8 +121,9 @@ class TicTacToe
   # The logic for the victory is written in here
 
   def cpu_move
-    is_user_going_to_win = possible_victory("user")
     is_cpu_going_to_win = possible_victory("cpu")
+    is_user_going_to_win = possible_victory("user")
+
     # Make cpu make the winning move if possible
     if is_cpu_going_to_win != 0
       @board[is_cpu_going_to_win] = @cpu
@@ -152,6 +153,7 @@ class TicTacToe
           @board[random_corner] = @cpu
         end
       else #make random move
+        puts "Time for random move"
         @board[possible_moves.keys.sample] = @cpu
       end
     end
@@ -227,32 +229,18 @@ class TicTacToe
   # if yes, then return position to block
   # else, does nothing
 
-  def possible_victory(who = "user")
+  def possible_victory(who)
+    pos = 0
     @victories.each do |victory|
       sum = 0
       count = 0
-
       if who == "user"
-        # If it's a unique winning case where the user can get two possible winning spaces
-        # Check if the user has one move on two corners in any diagonal
-        if victory.detect {|key| @board[:a1] == @user && @board[:c3] == @user} || victory.detect {|key| @board[:a3] == @user && @board[:c1] == @user}
-          # Decide move
-          if @board[:a1] == " " && @board[:c1] == " "
-            sum = rand() > 0.5 ? 12 : 8
-          elsif @board[:a1] == " "
-            sum = 8
-          elsif @board[:c1] == " "
-            sum = 12
-          end
-          count = 2
-        else
-          # If there are no moves by cpu in any victory condition then check if user can win
-          if !(victory.detect {|key| @board[key] == @cpu})
-            victory.each do |key|
-              if @board[key] == @user
-                sum += @positions[key]
-                count += 1
-              end
+        # If there are no moves by cpu in any victory condition then check if user can win
+        if !(victory.detect {|key| @board[key] == @cpu})
+          victory.each do |key|
+            if @board[key] == @user
+              sum += @positions[key]
+              count += 1
             end
           end
         end
@@ -267,13 +255,24 @@ class TicTacToe
           end
         end
       end
-      
       if sum < 15 && count == 2
-        pos = 15 - sum
-        return @positions.key(pos) # return position for making next move
+        pos = @positions.key(15 - sum) # return position for making next move
+        return pos
       end
     end
-    return 0
+    # If it's a unique winning case where the user can get two possible winning spaces
+    # Check if the user has one move on two corners in any diagonal
+    if ((@board[:a1] == @user && @board[:c3] == @user) || (@board[:a3] == @user && @board[:c1] == @user)) && @board[:b2] == @cpu && who == "user"
+      # Decide move
+      if @board[:a2] == " " && @board[:c2] == " "
+        pos = rand() > 0.5 ? 7 : 3
+      elsif @board[:a2] == " "
+        pos = 7
+      elsif @board[:c2] == " "
+        pos = 3
+      end
+    end
+    return (pos != 0)? @positions.key(pos) : 0
   end
 
   # Checks if either user or cpu has won the game
